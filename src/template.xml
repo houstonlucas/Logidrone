@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Base_Format>
+    <DroneData xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <Version>1.2.0</Version>
+      <WasShared>false</WasShared>
+      <UserId>76561198067812786</UserId>
+      <DroneName>skeleton</DroneName>
+      <Description />
+      <UniqueId>d877d42f-0601-4af3-80a1-07f7564d67ab</UniqueId>
+      <RootDronePart xsi:type="BindableDronePartData">
+        <PrefabId>ddce6270-82ec-45a6-a05c-2b7b33f8e81a</PrefabId>
+        <PersistentId>57c00fec-f9cd-4c26-a31e-3194349cfa5f</PersistentId>
+        <CurrentPosition>
+          <x>0</x>
+          <y>0</y>
+          <z>1</z>
+        </CurrentPosition>
+        <CurrentRotation>
+          <x>-0</x>
+          <y>-0</y>
+          <z>-0</z>
+          <w>1</w>
+          <eulerAngles>
+            <x>-0</x>
+            <y>0</y>
+            <z>0</z>
+          </eulerAngles>
+        </CurrentRotation>
+        <OriginalPosition>
+          <x>0</x>
+          <y>0</y>
+          <z>0</z>
+        </OriginalPosition>
+        <OriginalRotation>
+          <x>-0</x>
+          <y>-0</y>
+          <z>-0</z>
+          <w>1</w>
+          <eulerAngles>
+            <x>-0</x>
+            <y>0</y>
+            <z>0</z>
+          </eulerAngles>
+        </OriginalRotation>
+        <Children>
+        </Children>
+        <KeyBindings>
+          <KeyBindingData>
+            <Name>Explode</Name>
+            <Key>None</Key>
+            <HasBeenAssigned>false</HasBeenAssigned>
+            <Tag />
+          </KeyBindingData>
+        </KeyBindings>
+      </RootDronePart>
+      <NumberOfParts>0</NumberOfParts>
+      <NumberOfWeapons>0</NumberOfWeapons>
+      <Diameter>25.0599289</Diameter>
+      <WeaponPresets />
+    </DroneData>
+  </Base_Format>
+  <Part_Format>
+    <DronePartData xsi:type="SensorPartData">
+      <PrefabId></PrefabId>
+      <PersistentId>1d5899f6-211a-4c7d-a9c1-e4cfde28548b</PersistentId>
+      <CurrentPosition>
+        <x>-4</x>
+        <y>-9</y>
+        <z>1</z>
+      </CurrentPosition>
+      <CurrentRotation>
+        <x>-0</x>
+        <y>-0</y>
+        <z>-0</z>
+        <w>1</w>
+        <eulerAngles>
+          <x>-0</x>
+          <y>0</y>
+          <z>0</z>
+        </eulerAngles>
+      </CurrentRotation>
+      <OriginalPosition>
+        <x>-4</x>
+        <y>-9</y>
+        <z>0</z>
+      </OriginalPosition>
+      <OriginalRotation>
+        <x>-0</x>
+        <y>-0</y>
+        <z>-0</z>
+        <w>1</w>
+        <eulerAngles>
+          <x>-0</x>
+          <y>0</y>
+          <z>0</z>
+        </eulerAngles>
+      </OriginalRotation>
+      <Children />
+      <KeyBindings>
+      </KeyBindings>
+      <EventBindings>
+      </EventBindings>
+    </DronePartData>
+  </Part_Format>
+  <KeyBinding_Format>
+    <KeyBindingData>
+      <Name></Name>
+      <Key>None</Key>
+      <HasBeenAssigned>false</HasBeenAssigned>
+      <Tag></Tag>
+    </KeyBindingData>
+  </KeyBinding_Format>
+</root>
