@@ -61,8 +61,8 @@ class DroneWriter:
 
         self.doc = template_root.find("Base_Format")[0]
         self.root_drone_part = self.doc.find("RootDronePart")
-        self.part_format = template_root.find("Part_Format")
-        self.keybinding_format = template_root.find("KeyBinding_Format")
+        self.part_format = template_root.find("Part_Format")[0]
+        self.keybinding_format = template_root.find("KeyBinding_Format")[0]
 
         self.x_pos = 0
         self.y_pos = 5
@@ -94,7 +94,7 @@ class DroneWriter:
         gate_type = gate['type']
         prefab_id = DroneWriter.prefab_id_lookup[gate_type]
 
-        child = copy.deepcopy(self.part_format[0])
+        child = copy.deepcopy(self.part_format)
         prefab = child.find("PrefabId")
         prefab.text = prefab_id
 
@@ -106,6 +106,21 @@ class DroneWriter:
 
         self.y_pos += 2
 
+        child_keybindings = child.find("KeyBindings")
+
+        for input_index, input_tag in enumerate(gate['inputs']):
+            name = "Input {}".format(input_index + 1)
+            input_binding = self.generate_KeyBindingData(name, input_tag)
+            child_keybindings.append(input_binding)
+
+        child_eventbindings = child.find("EventBindings")
+
+        for output_index, output_tag in enumerate(gate['outputs']):
+            # TODO make this accept various names
+            name = "Output"
+            output_binding = self.generate_KeyBindingData(name, output_tag)
+            child_eventbindings.append(output_binding)
+
         return child
 
     def set_position_elem(self, elem):
@@ -114,10 +129,24 @@ class DroneWriter:
         x_field.text = str(self.x_pos)
         y_field.text = str(self.y_pos)
 
-# Inspired from https://pymotw.com/2/xml/etree/ElementTree/create.html
+    def generate_KeyBindingData(self, name, tag):
+        binding = copy.deepcopy(self.keybinding_format)
+        binding_name = binding.find("Name")
+        binding_name.text = name
+
+        binding_tag = binding.find("Tag")
+        binding_tag.text = tag
+
+        binding_set = binding.find("HasBeenAssigned")
+        binding_set.text = "true"
+
+        return binding
+
+
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
     """
+    # Inspired from https://pymotw.com/2/xml/etree/ElementTree/create.html
     indent = "  "
     rough_string = ET.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
