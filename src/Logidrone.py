@@ -97,15 +97,22 @@ class DroneWriter:
         child = copy.deepcopy(self.part_format[0])
         prefab = child.find("PrefabId")
         prefab.text = prefab_id
+
         orig_pos = child.find("OriginalPosition")
-        orig_x = orig_pos.find('x')
-        orig_y = orig_pos.find('y')
-        orig_x.text = str(self.x_pos)
-        orig_y.text = str(self.y_pos)
+        self.set_position_elem(orig_pos)
+
+        current_pos = child.find("CurrentPosition")
+        self.set_position_elem(current_pos)
+
         self.y_pos += 2
 
         return child
 
+    def set_position_elem(self, elem):
+        x_field = elem.find('x')
+        y_field = elem.find('y')
+        x_field.text = str(self.x_pos)
+        y_field.text = str(self.y_pos)
 
 # Inspired from https://pymotw.com/2/xml/etree/ElementTree/create.html
 def prettify(elem):
