@@ -8,19 +8,24 @@ def main():
 
 
 class CircuitReader:
+    accepted_types = ["AND", "OR"]
     def __init__(self):
-        self.data=''
-        self.gates=[]
-        pass
-
-    def load_file(file_name):
+        self.data = ''
+        self.gates = []
+    def load_file(self, file_name):
         with open(file_name, 'r') as myfile:
-            self.data=myfile.read().replace('\n', '')
-        self.data=ast.literal_eval(self.data)
-        self.data=ast.literal_eval(self.data['data'])
-
-    def parse_gates():
-
+            self.data = myfile.read().replace('\n', '')
+        self.data = ast.literal_eval(self.data)
+        self.data = ast.literal_eval(self.data['data'])
+    def parse_gates(self):
+        for gate in self.data[0]:
+            if gate[0] in self.accepted_types:
+                i_names = []
+                for i_put in gate[0]['input']:
+                    for t_gate in self.data[0]:
+                        if i_put['id'] == t_gate[1]['id']:
+                            i_names.append(t_gate[1]['name'])
+                self.gates.append({'type':gate[0],'inputs':i_names,'outputs':[gate[0]['name']]})
 
 class DroneWriter:
     prefab_id_lookup = {
