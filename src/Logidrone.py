@@ -1,3 +1,4 @@
+import ast
 import json
 import xml.etree.ElementTree as ET
 
@@ -8,7 +9,17 @@ def main():
 
 class CircuitReader:
     def __init__(self):
+        self.data=''
+        self.gates=[]
         pass
+
+    def load_file(file_name):
+        with open(file_name, 'r') as myfile:
+            self.data=myfile.read().replace('\n', '')
+        self.data=ast.literal_eval(self.data)
+        self.data=ast.literal_eval(self.data['data'])
+
+    def parse_gates():
 
 
 class DroneWriter:
