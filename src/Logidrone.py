@@ -1,3 +1,11 @@
+import json
+import xml.etree.ElementTree as ET
+
+
+def main():
+    test_writer()
+
+
 class CircuitReader:
     def __init__(self):
         pass
@@ -23,16 +31,22 @@ class DroneWriter:
         pass
 
 
-class LogicGate:
-    def __init__(self):
-        pass
+def test_writer():
+    circuit = [
+        {
+            'type': 'AND',
+            'inputs': ['A', 'B'],
+            'outputs': ['D']
+        },
+        {
+            'type': 'OR',
+            'inputs': ['D', 'C'],
+            'outputs': ['E']
+        }
+    ]
 
 
-class Tag:
-    def __init__(self):
-        pass
 
 
-class Sensor:
-    def __init__(self):
-        pass
+if __name__ == '__main__':
+    main()
