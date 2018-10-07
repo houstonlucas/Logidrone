@@ -11,7 +11,6 @@ import zipfile
 def main():
     test_writer("test.drn")
 
-
 class CircuitReader:
     accepted_types = ["AND", "OR"]
     def __init__(self):
