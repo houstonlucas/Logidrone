@@ -11,16 +11,20 @@ import zipfile
 def main():
     test_writer("test.drn")
 
+
 class CircuitReader:
     accepted_types = ["AND", "OR"]
+
     def __init__(self):
         self.data = ''
         self.gates = []
+
     def load_file(self, file_name):
         with open(file_name, 'r') as myfile:
             self.data = myfile.read().replace('\n', '')
         self.data = ast.literal_eval(self.data)
         self.data = ast.literal_eval(self.data['data'])
+
     def parse_gates(self):
         for gate in self.data[0]:
             if gate[0] in self.accepted_types:
@@ -29,7 +33,8 @@ class CircuitReader:
                     for t_gate in self.data[0]:
                         if i_put['id'] == t_gate[1]['id']:
                             i_names.append(t_gate[1]['name'])
-                self.gates.append({'type':gate[0],'inputs':i_names,'outputs':[gate[0]['name']]})
+                self.gates.append({'type': gate[0], 'inputs': i_names, 'outputs': [gate[0]['name']]})
+
 
 class DroneWriter:
     prefab_id_lookup = {
