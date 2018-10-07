@@ -1,9 +1,14 @@
+import copy
 import json
+import os
 import xml.etree.ElementTree as ET
+from xml.dom import minidom
+import re
+import zipfile
 
 
 def main():
-    test_writer()
+    test_writer("test.drn")
 
 
 class CircuitReader:
@@ -26,12 +31,77 @@ class DroneWriter:
         'ONOFFSWITCH': '1951bd8f-47fd-477f-b355-c17a4ed9d769',
         'LED': '25c66ac2-de8e-471f-9d5d-4df094a9ed27'
     }
+    data_file = "DroneData"
+    image_file = "Image.png"
 
     def __init__(self):
-        pass
+        # Load templates
+        template_tree = ET.parse('template.xml')
+        template_root = template_tree.getroot()
+
+        self.doc = template_root.find("Base_Format")[0]
+        self.root_drone_part = self.doc.find("RootDronePart")
+        self.part_format = template_root.find("Part_Format")
+        self.keybinding_format = template_root.find("KeyBinding_Format")
+
+        self.x_pos = 0
+        self.y_pos = 5
+
+        self.clean_up_temp = False
+
+    def construct_circuit(self, circuit):
+        for gate in circuit:
+            self.add_gate(gate)
+
+    def write_to_file(self, filename):
+        str_data = prettify(self.doc)
+        with open(DroneWriter.data_file, 'w+') as f:
+            f.write(str_data)
+        drn_file = zipfile.ZipFile(filename, 'w')
+        drn_file.write(DroneWriter.data_file, compress_type=zipfile.ZIP_DEFLATED)
+        drn_file.write(DroneWriter.image_file, compress_type=zipfile.ZIP_DEFLATED)
+        drn_file.close()
+
+        if self.clean_up_temp:
+            os.remove(DroneWriter.data_file)
+
+    def add_gate(self, gate):
+        drone_children = self.root_drone_part.find("Children")
+        new_child = self.make_child(gate)
+        drone_children.append(new_child)
+
+    def make_child(self, gate):
+        gate_type = gate['type']
+        prefab_id = DroneWriter.prefab_id_lookup[gate_type]
+
+        child = copy.deepcopy(self.part_format[0])
+        prefab = child.find("PrefabId")
+        prefab.text = prefab_id
+        orig_pos = child.find("OriginalPosition")
+        orig_x = orig_pos.find('x')
+        orig_y = orig_pos.find('y')
+        orig_x.text = str(self.x_pos)
+        orig_y.text = str(self.y_pos)
+        self.y_pos += 2
+
+        return child
 
 
-def test_writer():
+# Inspired from https://pymotw.com/2/xml/etree/ElementTree/create.html
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    indent = "  "
+    rough_string = ET.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    reparsed = reparsed.toprettyxml(indent=indent)
+    lines = reparsed.split("\n")
+    filtered_lines = [line for line in lines if not re.match(r'^\s*$', line)]
+    reparsed = "\n".join(filtered_lines)
+    return reparsed
+
+
+def test_writer(filename):
     circuit = [
         {
             'type': 'AND',
@@ -44,8 +114,9 @@ def test_writer():
             'outputs': ['E']
         }
     ]
-
-
+    dw = DroneWriter()
+    dw.construct_circuit(circuit)
+    dw.write_to_file(filename)
 
 
 if __name__ == '__main__':
