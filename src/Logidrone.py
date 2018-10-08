@@ -9,32 +9,110 @@ import zipfile
 
 
 def main():
-    test_writer("test.drn")
+    circuit = test_reader()
+    test_writer("test.drn", circuit)
 
 
 class CircuitReader:
+    """
+    Base class for reading circuit files.
+    """
     accepted_types = ["AND", "OR"]
 
     def __init__(self):
-        self.data = ''
-        self.gates = []
+        self.nodes = []
+        self.wires = []
+        self.circuit = []
+
+        # The structure of this variable is determined by the derived class.
+        self.circuit_data = None
 
     def load_file(self, file_name):
-        with open(file_name, 'r') as myfile:
-            self.data = myfile.read().replace('\n', '')
-        self.data = ast.literal_eval(self.data)
-        self.data = ast.literal_eval(self.data['data'])
+        """
+        Loads relevant data to 'circuit_data' as some
+        """
+        raise NotImplementedError
 
-    def parse_gates(self):
-        for gate in self.data[0]:
-            if gate[0] in self.accepted_types:
-                i_names = []
-                for i_put in gate[0]['input']:
-                    for t_gate in self.data[0]:
-                        if i_put['id'] == t_gate[1]['id']:
-                            i_names.append(t_gate[1]['name'])
-                self.gates.append({'type': gate[0], 'inputs': i_names, 'outputs': [gate[0]['name']]})
+    def get_nodes(self):
+        """
+        Retrieves the nodes (gates, inputs, outputs) from 'circuit_data'.
+        """
+        raise NotImplementedError
 
+    def get_wires(self):
+        """
+        Retrieves the wires from 'circuit_data'.
+        """
+        raise NotImplementedError
+
+    def forward(self, node):
+        """
+        Returns a list of nodes to which the given node passes data.
+        """
+        mapping = {
+            'A': 'D',
+            'B': 'D',
+            'C': 'E',
+            'D': 'E'
+        }
+        name = node['outputs']
+        maps_to = []
+        if name in mapping:
+            maps_to = mapping[name]
+        ans = []
+        for node_index, n in enumerate(self.nodes):
+            for output in n['outputs']:
+                if output == maps_to:
+                    ans.append(node_index)
+        return ans
+        # raise NotImplementedError
+
+    def create_circuit(self):
+        for node in self.nodes:
+            connection_indices = self.forward(node)
+            for index in connection_indices:
+                if self.nodes[index]['type'] in CircuitReader.accepted_types:
+                    self.nodes[index]['inputs'].append(node['outputs'])
+
+        self.circuit = [node for node in self.nodes if node['type'] in CircuitReader.accepted_types]
+
+class CircuitReader_Logisim(CircuitReader):
+    node_pin_offsets = {'PIN':  {'input':[0,0], 'output':[0,0]}, 'NOT':  {'input':[(-30,0)], 'output':[(0,0)]}, 'AND':  {'input':[(-50,-20),(-50,-10),(-50,0),(-50,10),(-50,20)], 'output':[(0,0)]}, 'OR':   {'input':[(-50,-20),(-50,-10),(-50,0),(-50,10),(-50,20)], 'output':[(0,0)]}, 'NOR':  {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'NAND': {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'XOR':  {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'XNOR': {'input':[(-70,-20),(-70,-10),(-70,0),(-70,10),(-70,20)], 'output':[(0,0)]}}
+
+    def __init__(self, arg):
+        super(CircuitReader_Logisim, self).__init__()
+        self.nodes = []
+        self.paths = []
+
+    def prep_file(self, file_name):
+        with open(file_name, 'rt') as base_file:
+            self.loigisim_tree = ET.parse(base_file)
+        self.loigisim_iter = loigisim_tree.getiterator()
+
+    def get_nodes(self):
+        for item in loigisim_iter:
+            if item.tag == "comp":
+                comp = {}
+                comp['input'] = []
+                comp['output'] = []
+                comp['output'].append(item.get("loc"))
+                comp['type'] = item.get("name")
+                attributes = item.getchildren()
+                for attr in attributes:
+                    if attr.get("name") == 'label'
+                        comp['name'] = attr.get("val")
+                self.nodes.append(comp)
+
+    def get_wires(self):
+        for item in loigisim_iter:
+            if item.tag == 'wire':
+                # Get Start and End position pairs
+                # Get all <a> items to descibe
+                pass
+
+    def forward(self):
+
+        
 
 class DroneWriter:
     prefab_id_lookup = {
