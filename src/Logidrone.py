@@ -105,9 +105,7 @@ class CircuitReader_Logisim(CircuitReader):
     def get_wires(self):
         for item in loigisim_iter:
             if item.tag == 'wire':
-                # Get Start and End position pairs
-                # Get all <a> items to descibe
-                pass
+                self.wires.append([eval(item.get('from')),eval(item.get('to'))])
 
     def forward(self):
 
