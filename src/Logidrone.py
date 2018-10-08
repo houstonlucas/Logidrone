@@ -151,6 +151,12 @@ class DroneWriter:
         for gate in circuit:
             self.add_gate(gate)
 
+    def set_drone_name(self, drone_name):
+        self.doc.find("DroneName").text = drone_name
+
+    def set_drone_description(self, drone_description):
+        self.doc.find("Description").text = drone_description
+
     def write_to_file(self, filename):
         str_data = prettify(self.doc)
         with open(DroneWriter.data_file, 'w+') as f:
@@ -165,10 +171,11 @@ class DroneWriter:
 
     def add_gate(self, gate):
         drone_children = self.root_drone_part.find("Children")
-        new_child = self.make_child(gate)
+        new_child = self.make_child(gate, (self.x_pos, self.y_pos))
+        self.x_pos += 4
         drone_children.append(new_child)
 
-    def make_child(self, gate):
+    def make_child(self, gate, pos):
         gate_type = gate['type']
         prefab_id = DroneWriter.prefab_id_lookup[gate_type]
 
@@ -177,12 +184,10 @@ class DroneWriter:
         prefab.text = prefab_id
 
         orig_pos = child.find("OriginalPosition")
-        self.set_position_elem(orig_pos)
+        self.set_position_elem(orig_pos, pos)
 
         current_pos = child.find("CurrentPosition")
-        self.set_position_elem(current_pos)
-
-        self.y_pos += 2
+        self.set_position_elem(current_pos, pos)
 
         child_keybindings = child.find("KeyBindings")
 
@@ -201,11 +206,15 @@ class DroneWriter:
 
         return child
 
-    def set_position_elem(self, elem):
+    def set_position_elem(self, elem, pos):
+        x_pos, y_pos = pos
         x_field = elem.find('x')
         y_field = elem.find('y')
-        x_field.text = str(self.x_pos)
-        y_field.text = str(self.y_pos)
+        x_field.text = str(x_pos)
+        y_field.text = str(y_pos)
+
+    def set_rotation_elem(self, elem, rotation):
+        pass
 
     def generate_KeyBindingData(self, name, tag):
         binding = copy.deepcopy(self.keybinding_format)
@@ -237,6 +246,8 @@ def prettify(elem):
 
 def test_writer(filename, circuit):
     dw = DroneWriter()
+    dw.set_drone_name("test_article")
+    dw.set_drone_description("This is a test article created by Logidrone!")
     dw.construct_circuit(circuit)
     dw.write_to_file(filename)
 
