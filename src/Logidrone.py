@@ -9,7 +9,18 @@ import zipfile
 
 
 def main():
-    circuit = test_reader()
+    circuit = [
+        {
+            'type':'AND',
+            'inputs': ['A', 'B'],
+            'outputs': ['D']
+        },
+        {
+            'type':'OR',
+            'inputs': ['D', 'C'],
+            'outputs': ['E']
+        }
+    ]
     test_writer("test.drn", circuit)
 
 
@@ -100,7 +111,7 @@ class CircuitReader_Logisim(CircuitReader):
                 comp['type'] = item.get("name")
                 attributes = item.getchildren()
                 for attr in attributes:
-                    if attr.get("name") == 'label'
+                    if attr.get("name") == 'label':
                         comp['name'] = attr.get("val")
                 self.nodes.append(comp)
 
@@ -112,6 +123,7 @@ class CircuitReader_Logisim(CircuitReader):
                 pass
 
     def forward(self):
+        pass
 
 
 class DroneWriter:
@@ -149,7 +161,11 @@ class DroneWriter:
 
     def construct_circuit(self, circuit):
         for gate in circuit:
-            self.add_gate(gate)
+            pos = (self.x_pos, self.y_pos)
+            orientation = "h"
+            location = (pos, orientation)
+            self.add_gate(gate, location)
+            self.x_pos += 4
 
     def set_drone_name(self, drone_name):
         self.doc.find("DroneName").text = drone_name
@@ -169,13 +185,13 @@ class DroneWriter:
         if self.clean_up_temp:
             os.remove(DroneWriter.data_file)
 
-    def add_gate(self, gate):
+    def add_gate(self, gate, position, orientation):
         drone_children = self.root_drone_part.find("Children")
-        new_child = self.make_child(gate, (self.x_pos, self.y_pos))
-        self.x_pos += 4
+
+        new_child = self.make_child(gate, position, orientation)
         drone_children.append(new_child)
 
-    def make_child(self, gate, pos):
+    def make_child(self, gate, position, orientation):
         gate_type = gate['type']
         prefab_id = DroneWriter.prefab_id_lookup[gate_type]
 
@@ -184,10 +200,10 @@ class DroneWriter:
         prefab.text = prefab_id
 
         orig_pos = child.find("OriginalPosition")
-        self.set_position_elem(orig_pos, pos)
+        self.set_position_elem(orig_pos, position)
 
         current_pos = child.find("CurrentPosition")
-        self.set_position_elem(current_pos, pos)
+        self.set_position_elem(current_pos, position)
 
         child_keybindings = child.find("KeyBindings")
 
@@ -213,7 +229,7 @@ class DroneWriter:
         x_field.text = str(x_pos)
         y_field.text = str(y_pos)
 
-    def set_rotation_elem(self, elem, rotation):
+    def set_rotation_elem(self, elem, orientation):
         pass
 
     def generate_KeyBindingData(self, name, tag):
