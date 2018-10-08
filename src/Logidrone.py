@@ -93,10 +93,8 @@ class CircuitReader_Logisim(CircuitReader):
 
     def __init__(self, arg):
         super(CircuitReader_Logisim, self).__init__()
-        self.nodes = []
-        self.paths = []
 
-    def prep_file(self, file_name):
+    def load_file(self, file_name):
         with open(file_name, 'rt') as base_file:
             self.loigisim_tree = ET.parse(base_file)
         self.loigisim_iter = loigisim_tree.getiterator()
@@ -118,9 +116,7 @@ class CircuitReader_Logisim(CircuitReader):
     def get_wires(self):
         for item in loigisim_iter:
             if item.tag == 'wire':
-                # Get Start and End position pairs
-                # Get all <a> items to descibe
-                pass
+                self.wires.append([eval(item.get('from')),eval(item.get('to'))])
 
     def forward(self):
         pass
