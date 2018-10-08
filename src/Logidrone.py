@@ -82,10 +82,8 @@ class CircuitReader_Logisim(CircuitReader):
 
     def __init__(self, arg):
         super(CircuitReader_Logisim, self).__init__()
-        self.nodes = []
-        self.paths = []
 
-    def prep_file(self, file_name):
+    def load_file(self, file_name):
         with open(file_name, 'rt') as base_file:
             self.loigisim_tree = ET.parse(base_file)
         self.loigisim_iter = loigisim_tree.getiterator()
