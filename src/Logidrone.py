@@ -77,6 +77,43 @@ class CircuitReader:
         self.circuit = [node for node in self.nodes if node['type'] in CircuitReader.accepted_types]
 
 
+class CircuitReader_Logisim(CircuitReader):
+    node_pin_offsets = {'PIN':  {'input':[0,0], 'output':[0,0]}, 'NOT':  {'input':[(-30,0)], 'output':[(0,0)]}, 'AND':  {'input':[(-50,-20),(-50,-10),(-50,0),(-50,10),(-50,20)], 'output':[(0,0)]}, 'OR':   {'input':[(-50,-20),(-50,-10),(-50,0),(-50,10),(-50,20)], 'output':[(0,0)]}, 'NOR':  {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'NAND': {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'XOR':  {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'XNOR': {'input':[(-70,-20),(-70,-10),(-70,0),(-70,10),(-70,20)], 'output':[(0,0)]}}
+
+    def __init__(self, arg):
+        super(CircuitReader_Logisim, self).__init__()
+        self.nodes = []
+        self.paths = []
+
+    def prep_file(self, file_name):
+        with open(file_name, 'rt') as base_file:
+            self.loigisim_tree = ET.parse(base_file)
+        self.loigisim_iter = loigisim_tree.getiterator()
+
+    def get_nodes(self):
+        for item in loigisim_iter:
+            if item.tag == "comp":
+                comp = {}
+                comp['input'] = []
+                comp['output'] = []
+                comp['output'].append(item.get("loc"))
+                comp['type'] = item.get("name")
+                attributes = item.getchildren()
+                for attr in attributes:
+                    if attr.get("name") == 'label'
+                        comp['name'] = attr.get("val")
+                self.nodes.append(comp)
+
+    def get_wires(self):
+        for item in loigisim_iter:
+            if item.tag == 'wire':
+                # Get Start and End position pairs
+                # Get all <a> items to descibe
+                pass
+
+    def forward(self):
+
+
 class DroneWriter:
     prefab_id_lookup = {
         'BUTTON': '8bcf3ab6-fff7-43c5-ab51-ac18ad11e339',
