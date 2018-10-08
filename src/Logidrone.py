@@ -9,31 +9,72 @@ import zipfile
 
 
 def main():
-    test_writer("test.drn")
+    circuit = test_reader()
+    test_writer("test.drn", circuit)
 
 
 class CircuitReader:
+    """
+    Base class for reading circuit files.
+    """
     accepted_types = ["AND", "OR"]
 
     def __init__(self):
-        self.data = ''
-        self.gates = []
+        self.nodes = []
+        self.wires = []
+        self.circuit = []
+
+        # The structure of this variable is determined by the derived class.
+        self.circuit_data = None
 
     def load_file(self, file_name):
-        with open(file_name, 'r') as myfile:
-            self.data = myfile.read().replace('\n', '')
-        self.data = ast.literal_eval(self.data)
-        self.data = ast.literal_eval(self.data['data'])
+        """
+        Loads relevant data to 'circuit_data' as some
+        """
+        raise NotImplementedError
 
-    def parse_gates(self):
-        for gate in self.data[0]:
-            if gate[0] in self.accepted_types:
-                i_names = []
-                for i_put in gate[0]['input']:
-                    for t_gate in self.data[0]:
-                        if i_put['id'] == t_gate[1]['id']:
-                            i_names.append(t_gate[1]['name'])
-                self.gates.append({'type': gate[0], 'inputs': i_names, 'outputs': [gate[0]['name']]})
+    def get_nodes(self):
+        """
+        Retrieves the nodes (gates, inputs, outputs) from 'circuit_data'.
+        """
+        raise NotImplementedError
+
+    def get_wires(self):
+        """
+        Retrieves the wires from 'circuit_data'.
+        """
+        raise NotImplementedError
+
+    def forward(self, node):
+        """
+        Returns a list of nodes to which the given node passes data.
+        """
+        mapping = {
+            'A': 'D',
+            'B': 'D',
+            'C': 'E',
+            'D': 'E'
+        }
+        name = node['outputs']
+        maps_to = []
+        if name in mapping:
+            maps_to = mapping[name]
+        ans = []
+        for node_index, n in enumerate(self.nodes):
+            for output in n['outputs']:
+                if output == maps_to:
+                    ans.append(node_index)
+        return ans
+        # raise NotImplementedError
+
+    def create_circuit(self):
+        for node in self.nodes:
+            connection_indices = self.forward(node)
+            for index in connection_indices:
+                if self.nodes[index]['type'] in CircuitReader.accepted_types:
+                    self.nodes[index]['inputs'].append(node['outputs'])
+
+        self.circuit = [node for node in self.nodes if node['type'] in CircuitReader.accepted_types]
 
 
 class DroneWriter:
@@ -157,22 +198,43 @@ def prettify(elem):
     return reparsed
 
 
-def test_writer(filename):
-    circuit = [
-        {
-            'type': 'AND',
-            'inputs': ['A', 'B'],
-            'outputs': ['D']
-        },
-        {
-            'type': 'OR',
-            'inputs': ['D', 'C'],
-            'outputs': ['E']
-        }
-    ]
+def test_writer(filename, circuit):
     dw = DroneWriter()
     dw.construct_circuit(circuit)
     dw.write_to_file(filename)
+
+
+def test_reader():
+    cr = CircuitReader()
+    cr.nodes = [
+        {
+            'outputs': "A",
+            'type': "INPUT",
+            'inputs': []
+        },
+        {
+            'outputs': "B",
+            'type': "INPUT",
+            'inputs': []
+        },
+        {
+            'outputs': "C",
+            'type': "INPUT",
+            'inputs': []
+        },
+        {
+            'outputs': "D",
+            'type': "AND",
+            'inputs': []
+        },
+        {
+            'outputs': "E",
+            'type': "OR",
+            'inputs': []
+        },
+    ]
+    cr.create_circuit()
+    return cr.circuit
 
 
 if __name__ == '__main__':
