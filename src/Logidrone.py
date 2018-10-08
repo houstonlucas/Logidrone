@@ -157,11 +157,12 @@ class DroneWriter:
 
     def construct_circuit(self, circuit):
         for gate in circuit:
-            pos = (self.x_pos, self.y_pos)
-            orientation = "h"
-            location = (pos, orientation)
-            self.add_gate(gate, location)
-            self.x_pos += 4
+            self.x_pos = 0
+            for orientation in ["n", "e", "s", "w"]:
+                position = (self.x_pos, self.y_pos)
+                self.add_gate(gate, position, orientation)
+                self.x_pos += 4
+            self.y_pos += 6
 
     def set_drone_name(self, drone_name):
         self.doc.find("DroneName").text = drone_name
@@ -198,8 +199,14 @@ class DroneWriter:
         orig_pos = child.find("OriginalPosition")
         self.set_position_elem(orig_pos, position)
 
+        orig_rotation = child.find("OriginalRotation")
+        self.set_rotation_elem(orig_rotation, orientation)
+
         current_pos = child.find("CurrentPosition")
         self.set_position_elem(current_pos, position)
+
+        current_rotation = child.find("CurrentRotation")
+        self.set_rotation_elem(current_rotation, orientation)
 
         child_keybindings = child.find("KeyBindings")
 
@@ -226,7 +233,29 @@ class DroneWriter:
         y_field.text = str(y_pos)
 
     def set_rotation_elem(self, elem, orientation):
-        pass
+        elem.find('x').text = "0"
+        elem.find('y').text = "0"
+        euler = elem.find("eulerAngles")
+        euler.find('x').text = "0"
+        euler.find('y').text = "0"
+        if orientation == 'n':
+            elem.find('z').text = "0"
+            elem.find('w').text = "1"
+            euler.find('z').text = "0"
+        elif orientation == 'w':
+            elem.find('z').text = "0.7071068"
+            elem.find('w').text = "-0.7071068"
+            euler.find('z').text = "90"
+        elif orientation == 's':
+            elem.find('z').text = "1"
+            elem.find('w').text = "0"
+            euler.find('z').text = "180"
+        elif orientation == 'e':
+            elem.find('z').text = "0.7071068"
+            elem.find('w').text = "0.7071068"
+            euler.find('z').text = "270"
+        else:
+            raise Exception("Invalid orientation")
 
     def generate_KeyBindingData(self, name, tag):
         binding = copy.deepcopy(self.keybinding_format)
