@@ -95,7 +95,7 @@ class CircuitReader_Logisim(CircuitReader):
                 comp['input'] = []
                 comp['output'] = []
                 comp['output'].append(item.get("loc"))
-                comp['type'] = item.get("name")
+                comp['type'] = item.get("name").split(' ')[0].upper()
                 attributes = item.getchildren()
                 for attr in attributes:
                     if attr.get("name") == 'label'
@@ -107,7 +107,27 @@ class CircuitReader_Logisim(CircuitReader):
             if item.tag == 'wire':
                 self.wires.append([eval(item.get('from')),eval(item.get('to'))])
 
-    def forward(self):
+    def forward(self, node):
+
+
+        # Mapping format
+        mapping = {
+            'A': ['D'],
+            'B': ['D'],
+            'C': ['E'],
+            'D': ['E']
+        }
+        name = node['outputs']
+        maps_to = []
+        if name in mapping:
+            maps_to = mapping[name]
+        ans = []
+        for node_index, n in enumerate(self.nodes):
+            for output in n['outputs']:
+                if output == maps_to:
+                    ans.append(node_index)
+        return ans
+        # raise NotImplementedError
 
 
 class DroneWriter:
