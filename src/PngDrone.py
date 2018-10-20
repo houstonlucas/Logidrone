@@ -92,7 +92,7 @@ def main():
     im_in = "greened.png"
     tree = None
 
-    place_circuit(im_in, tree, "bottom")
+    find_locations_for_gates(im_in, "bottom")
 
 
 def get_rect_origin(current_pixel, orientation):
@@ -103,19 +103,18 @@ def get_rect_origin(current_pixel, orientation):
         return current_pixel[0] + short, current_pixel[1] + long
 
 
-def place_circuit(im_in, tree, fill_first):
+def find_locations_for_gates(im_in, fill_first):
     im = Image.open(im_in)
     available_pixels = get_green_pixels(im)
+    gate_locations = []
 
     index = 0
     while len(available_pixels):
         current_pixel = available_pixels[index]
         can_place, orientation = examine_pixel(current_pixel, available_pixels, fill_first)
         if can_place:
+            gate_locations.append([current_pixel, orientation])
             placement_offsets = get_placement_offsets(orientation)
-
-            # TODO place gate in tree
-            print(get_rect_origin(current_pixel, orientation), orientation)
 
             # Remove used locations from available
             for offset in placement_offsets:
@@ -126,7 +125,8 @@ def place_circuit(im_in, tree, fill_first):
         else:
             # Pixel was unusable, go to next unused pixel.
             index += 1
-            print(len(available_pixels))
+
+    return gate_locations
 
 def get_placement_offsets(orientation):
     short = [0, 1]
