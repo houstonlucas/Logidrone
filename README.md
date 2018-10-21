@@ -42,7 +42,7 @@ The mask file mask.png is an image where all empty space pixels are white and al
 
 For example the drone shown here:
 <br/>
-<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_image/drone_for_mask.png" alt="An example drone for creating a mask." width="100"/>
+<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_images/drone_for_mask.png" alt="An example drone for creating a mask." width="400"/>
 
 Would result in the following mask:
 <br/>
