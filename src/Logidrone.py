@@ -56,7 +56,7 @@ def circuit_gen(args):
 
 
 def mask_gen(args):
-    print("Parsing circuit file")
+    print("Parsing drone file")
     parts = get_parts(args.input_drone)
     print("Parts have been parsed, writing to file.")
     make_image_from_parts(parts, args.mask_file)
@@ -324,12 +324,12 @@ class DroneWriter:
         self.clean_up_temp = False
 
     def construct_circuit(self, circuit):
-        y_pos = 6
+        y_pos = 5
         x_pos = 0
         for gate in circuit:
             position = (x_pos, y_pos)
             self.add_gate(gate, position, 'n')
-            x_pos += 4
+            y_pos += 2
 
     def set_drone_name(self, drone_name):
         self.doc.find("DroneName").text = drone_name
