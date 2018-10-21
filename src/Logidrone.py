@@ -193,19 +193,17 @@ class DroneWriter:
         self.part_format = template_root.find("Part_Format")[0]
         self.keybinding_format = template_root.find("KeyBinding_Format")[0]
 
-        self.x_pos = 0
-        self.y_pos = 5
-
         self.clean_up_temp = False
 
     def construct_circuit(self, circuit):
+        y_pos = 0
         for gate in circuit:
-            self.x_pos = 0
+            x_pos = 0
             for orientation in ["n", "e", "s", "w"]:
-                position = (self.x_pos, self.y_pos)
+                position = (x_pos, y_pos)
                 self.add_gate(gate, position, orientation)
-                self.x_pos += 4
-            self.y_pos += 6
+                x_pos += 4
+            y_pos += 6
 
     def set_drone_name(self, drone_name):
         self.doc.find("DroneName").text = drone_name
