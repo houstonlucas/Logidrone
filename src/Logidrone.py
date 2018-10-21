@@ -6,26 +6,134 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import re
 import zipfile
+import argparse
+
+from PngDrone import *
 
 
 def main():
-    circuit = [
-        {
-            'type': 'AND',
-            'inputs': ['A', 'B'],
-            'output': 'D'
-        },
-        {
-            'type': 'OR',
-            'inputs': ['D', 'C'],
-            'output': 'E'
-        }
-    ]
-    circuit = test_reader()
-    test_writer("test.drn", circuit)
+    args = process_args()
+
+    if args.command == "circuit_gen":
+        circuit_gen(args)
+    elif args.command == "mask_gen":
+        mask_gen(args)
+    elif args.command == "mask_merge":
+        mask_merge(args)
+    else:
+        print("Invalid command: %s" % args.command)
+        print("Run with -h flag for information on commands.")
+        exit()
 
 
-multi_input = ["AND", "OR", "NAND", "NOR", "XOR", "XNOR"]
+multi_input_gates = ["AND", "OR", "NAND", "NOR", "XOR", "XNOR"]
+
+default_description = "This is a test article created by Logidrone!"
+default_name = "Logidrone"
+default_drone_file = "out.drn"
+default_mask_file = "mask.png"
+
+command_help = '''The available commands are:
+
+circuit_gen: Generates a drone with the circuitry given.
+    Parameters used: circuit_file, drone_file_out, description, name
+    
+mask_gen: Generates a mask image from a given drone.
+    Parameters used: input_drone, mask_file
+
+mask_merge: Merges the given mask, drone, and circuit.
+    Parameters used: circuit_file, input_drone, mask_file, drone_file_out,
+        description, name
+'''
+
+
+def circuit_gen(args):
+    print("Loading circuit file")
+    circuit = retrieve_circuit(args.circuit_file)
+    print("Circuit loaded, attempting to generate drone in file: %s" % args.drone_file_out)
+    write_circuit_to_new_file(args.drone_file_out, circuit, args.name, args.description)
+    print("Successfully written to %s." % args.drone_file_out)
+
+
+def mask_gen(args):
+    print("Parsing circuit file")
+    parts = get_parts(args.input_drone)
+    print("Parts have been parsed, writing to file.")
+    make_image_from_parts(parts, args.mask_file)
+    print("Succesfully written to %s"%args.mask_file)
+
+
+def mask_merge(args):
+    print("This feature is not fully functional yet. Sorry!")
+
+
+def process_args():
+    parser = argparse.ArgumentParser(
+        description='Convert Logisim files into .drn files.',
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument('command', help=command_help)
+    parser.add_argument(
+        '-f', "--circuit_file",
+        help="The path to the digital circuit file."
+    )
+    parser.add_argument(
+        '-i', "--input_drone",
+        help='The drone to create a mask from.'
+    )
+    parser.add_argument(
+        '-m', "--mask_file",
+        help="The mask image file to decide where gates can be placed."
+    )
+    parser.add_argument(
+        '-o', '--drone_file_out',
+        default=default_drone_file, help="The path to output the drone."
+    )
+    parser.add_argument(
+        '-d', '--description', default=default_description,
+        help='The description of the drone. (Shown in game.)'
+    )
+    parser.add_argument(
+        '-n', '--name', default=default_name,
+        help='The name of the drone. (Shown in game.)'
+    )
+
+    args = parser.parse_args()
+
+    check_required_args(args)
+    return args
+
+
+def check_required_args(args):
+    requirements_met = True
+    if args.command == "circuit_gen":
+        if args.circuit_file is None:
+            requirements_met = False
+            print("Circuit file is a required argument for circuit_gen.")
+    elif args.command == "mask_gen":
+        if args.input_drone is None:
+            requirements_met = False
+            print("Input drone file is a required argument for mask_gen.")
+        if args.mask_file is None:
+            requirements_met = False
+            print("Mask file is a required argument for mask_gen.")
+    elif args.command == "mask_merge":
+        if args.input_drone is None:
+            requirements_met = False
+            print("Input drone file is a required argument for mask_merge.")
+        if args.mask_file is None:
+            requirements_met = False
+            print("Mask file is a required argument for mask_merge.")
+        if args.circuit_file is None:
+            requirements_met = False
+            print("Circuit file is a required argument for mask_merge.")
+    else:
+        requirements_met = False
+        print("Invalid command: %s" % args.command)
+        print("Run with -h flag for information on commands.")
+
+    if not requirements_met:
+        exit()
 
 
 class CircuitReader:
@@ -128,8 +236,7 @@ class CircuitReader_Logisim(CircuitReader):
                 comp['output_loc'] = []
                 comp['output_loc'].append(item.get("loc"))
                 comp['type'] = item.get("name").split(' ')[0].upper()
-                attributes = item.getchildren()
-                for attr in attributes:
+                for attr in item:
                     if attr.get("name") == 'label':
                         comp['name'] = attr.get("val")
                         comp['output'] = comp['name']
@@ -271,7 +378,7 @@ class DroneWriter:
         child_keybindings = child.find("KeyBindings")
 
         for input_index, input_tag in enumerate(gate['inputs']):
-            if gate_type in multi_input:
+            if gate_type in multi_input_gates:
                 name = "Input {}".format(input_index + 1)
             else:
                 name = "Input"
@@ -347,17 +454,17 @@ def prettify(elem):
     return reparsed
 
 
-def test_writer(filename, circuit):
+def write_circuit_to_new_file(filename, circuit, name, description):
     dw = DroneWriter()
-    dw.set_drone_name("test_article")
-    dw.set_drone_description("This is a test article created by Logidrone!")
+    dw.set_drone_name(name)
+    dw.set_drone_description(description)
     dw.construct_circuit(circuit)
     dw.write_to_file(filename)
 
 
-def test_reader():
+def retrieve_circuit(file_path):
     cr = CircuitReader_Logisim()
-    cr.load_file("../Boolr_Save/mountain_of_arrows.circ")
+    cr.load_file(file_path)
     cr.create_circuit()
 
     return cr.circuit
