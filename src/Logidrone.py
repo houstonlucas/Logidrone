@@ -11,24 +11,28 @@ import zipfile
 def main():
     circuit = [
         {
-            'type':'AND',
+            'type': 'AND',
             'inputs': ['A', 'B'],
-            'outputs': ['D']
+            'output': 'D'
         },
         {
-            'type':'OR',
+            'type': 'OR',
             'inputs': ['D', 'C'],
-            'outputs': ['E']
+            'output': 'E'
         }
     ]
+    circuit = test_reader()
     test_writer("test.drn", circuit)
+
+
+multi_input = ["AND", "OR", "NAND", "NOR", "XOR", "XNOR"]
 
 
 class CircuitReader:
     """
     Base class for reading circuit files.
     """
-    accepted_types = ["AND", "OR"]
+    accepted_types = ["AND", "OR", "NAND", "NOR", "XOR", "XNOR", "NOT"]
 
     def __init__(self):
         self.nodes = []
@@ -66,24 +70,26 @@ class CircuitReader:
             'C': 'E',
             'D': 'E'
         }
-        name = node['outputs']
+        name = node['output']
         maps_to = []
         if name in mapping:
             maps_to = mapping[name]
         ans = []
         for node_index, n in enumerate(self.nodes):
-            for output in n['outputs']:
+            for output in n['output']:
                 if output == maps_to:
                     ans.append(node_index)
         return ans
         # raise NotImplementedError
 
     def create_circuit(self):
+        self.get_nodes()
+        self.get_wires()
         for node in self.nodes:
             connection_indices = self.forward(node)
             for index in connection_indices:
                 if self.nodes[index]['type'] in CircuitReader.accepted_types:
-                    self.nodes[index]['inputs'].append(node['outputs'])
+                    self.nodes[index]['inputs'].append(node['output'])
 
         self.circuit = [node for node in self.nodes if node['type'] in CircuitReader.accepted_types]
 
@@ -92,7 +98,20 @@ class CircuitReader_Logisim(CircuitReader):
 
     def __init__(self):
         super(CircuitReader_Logisim, self).__init__()
-        self.node_pin_offsets = {'PIN':  {'input':[[0,0]], 'output':[[0,0]]}, 'NOT':  {'input':[[-30,0]], 'output':[[0,0]]}, 'AND':  {'input':[[-50,-20],[-50,-10],[-50,0],[-50,10],[-50,20]], 'output':[[0,0]]}, 'OR':   {'input':[[-50,-20],[-50,-10],[-50,0],[-50,10],[-50,20]], 'output':[[0,0]]}, 'NOR':  {'input':[[-60,-20],[-60,-10],[-60,0],[-60,10],[-60,20]], 'output':[[0,0]]}, 'NAND': {'input':[[-60,-20],[-60,-10],[-60,0],[-60,10],[-60,20]], 'output':[[0,0]]}, 'XOR':  {'input':[[-60,-20],[-60,-10],[-60,0],[-60,10],[-60,20]], 'output':[[0,0]]}, 'XNOR': {'input':[[-70,-20],[-70,-10],[-70,0],[-70,10],[-70,20]], 'output':[[0,0]]}}
+        self.node_pin_offsets = {'PIN': {'input': [[0, 0]], 'output': [[0, 0]]},
+                                 'NOT': {'input': [[-30, 0]], 'output': [[0, 0]]},
+                                 'AND': {'input': [[-50, -20], [-50, -10], [-50, 0], [-50, 10], [-50, 20]],
+                                         'output': [[0, 0]]},
+                                 'OR': {'input': [[-50, -20], [-50, -10], [-50, 0], [-50, 10], [-50, 20]],
+                                        'output': [[0, 0]]},
+                                 'NOR': {'input': [[-60, -20], [-60, -10], [-60, 0], [-60, 10], [-60, 20]],
+                                         'output': [[0, 0]]},
+                                 'NAND': {'input': [[-60, -20], [-60, -10], [-60, 0], [-60, 10], [-60, 20]],
+                                          'output': [[0, 0]]},
+                                 'XOR': {'input': [[-60, -20], [-60, -10], [-60, 0], [-60, 10], [-60, 20]],
+                                         'output': [[0, 0]]},
+                                 'XNOR': {'input': [[-70, -20], [-70, -10], [-70, 0], [-70, 10], [-70, 20]],
+                                          'output': [[0, 0]]}}
 
     def load_file(self, file_name):
         with open(file_name, 'rt') as base_file:
@@ -104,6 +123,7 @@ class CircuitReader_Logisim(CircuitReader):
         for item in self.loigisim_iter:
             if item.tag == "comp":
                 comp = {}
+                comp['inputs'] = []
                 comp['input_loc'] = []
                 comp['output_loc'] = []
                 comp['output_loc'].append(item.get("loc"))
@@ -112,30 +132,30 @@ class CircuitReader_Logisim(CircuitReader):
                 for attr in attributes:
                     if attr.get("name") == 'label':
                         comp['name'] = attr.get("val")
+                        comp['output'] = comp['name']
                 self.nodes.append(comp)
-        # raise NotImplementedError
 
     def get_wires(self):
         for item in self.loigisim_iter:
             if item.tag == 'wire':
-                self.wires.append([eval(item.get('from')),eval(item.get('to'))])
+                self.wires.append([eval(item.get('from')), eval(item.get('to'))])
         # raise NotImplementedError
 
     def have_available(self, f_pos, l_pos):
         for wire in self.wires:
             if wire[0] == eval(str(f_pos)) and wire[1] != eval(str(l_pos)):
                 return True
-            elif wire[1] == eval(str(f_pos))  and wire[0] != eval(str(l_pos)):
+            elif wire[1] == eval(str(f_pos)) and wire[0] != eval(str(l_pos)):
                 return True
         return False
 
     def get_next_layer(self, f_pos, l_pos):
-        #l_pos = f_pos
+        # l_pos = f_pos
         n_layer = []
         for wire in self.wires:
             if wire[0] == eval(str(f_pos)) and wire[1] != eval(str(l_pos)):
                 n_layer.append(wire[1])
-            elif wire[1] == eval(str(f_pos))  and wire[0] != eval(str(l_pos)):
+            elif wire[1] == eval(str(f_pos)) and wire[0] != eval(str(l_pos)):
                 n_layer.append(wire[0])
         return n_layer
 
@@ -160,7 +180,8 @@ class CircuitReader_Logisim(CircuitReader):
                 if comp_type in self.nodes[i]['type'].upper():
                     for offset in self.node_pin_offsets[comp_type]['input']:
                         for end_point in end_points:
-                            if end_point[0] == offset[0]+eval(str(self.nodes[i]['output_loc'][0]))[0] and end_point[1] == offset[1]+eval(str(self.nodes[i]['output_loc'][0]))[1]:
+                            if end_point[0] == offset[0] + eval(str(self.nodes[i]['output_loc'][0]))[0] and end_point[
+                                1] == offset[1] + eval(str(self.nodes[i]['output_loc'][0]))[1]:
                                 indexes.append(i)
         return indexes
 
@@ -196,14 +217,12 @@ class DroneWriter:
         self.clean_up_temp = False
 
     def construct_circuit(self, circuit):
-        y_pos = 0
+        y_pos = 6
+        x_pos = 0
         for gate in circuit:
-            x_pos = 0
-            for orientation in ["n", "e", "s", "w"]:
-                position = (x_pos, y_pos)
-                self.add_gate(gate, position, orientation)
-                x_pos += 4
-            y_pos += 6
+            position = (x_pos, y_pos)
+            self.add_gate(gate, position, 'n')
+            x_pos += 4
 
     def set_drone_name(self, drone_name):
         self.doc.find("DroneName").text = drone_name
@@ -252,17 +271,19 @@ class DroneWriter:
         child_keybindings = child.find("KeyBindings")
 
         for input_index, input_tag in enumerate(gate['inputs']):
-            name = "Input {}".format(input_index + 1)
+            if gate_type in multi_input:
+                name = "Input {}".format(input_index + 1)
+            else:
+                name = "Input"
             input_binding = self.generate_KeyBindingData(name, input_tag)
             child_keybindings.append(input_binding)
 
         child_eventbindings = child.find("EventBindings")
 
-        for output_index, output_tag in enumerate(gate['outputs']):
-            # TODO make this accept various names
-            name = "Output"
-            output_binding = self.generate_KeyBindingData(name, output_tag)
-            child_eventbindings.append(output_binding)
+        # TODO make this accept various names
+        name = "Output"
+        output_binding = self.generate_KeyBindingData(name, gate['output'])
+        child_eventbindings.append(output_binding)
 
         return child
 
@@ -335,35 +356,10 @@ def test_writer(filename, circuit):
 
 
 def test_reader():
-    cr = CircuitReader()
-    cr.nodes = [
-        {
-            'outputs': "A",
-            'type': "INPUT",
-            'inputs': []
-        },
-        {
-            'outputs': "B",
-            'type': "INPUT",
-            'inputs': []
-        },
-        {
-            'outputs': "C",
-            'type': "INPUT",
-            'inputs': []
-        },
-        {
-            'outputs': "D",
-            'type': "AND",
-            'inputs': []
-        },
-        {
-            'outputs': "E",
-            'type': "OR",
-            'inputs': []
-        },
-    ]
+    cr = CircuitReader_Logisim()
+    cr.load_file("../Boolr_Save/mountain_of_arrows.circ")
     cr.create_circuit()
+
     return cr.circuit
 
 
