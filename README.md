@@ -23,7 +23,10 @@ python Logidrone.py circuit_gen -f /path/to/circuit.circ -o /path/to/my_new_dron
 ```
 This creates a drone that consists only of the drone core and the logic gates from Logisim stacked above the drone.
 
+Circuit from logisim:
 ![alt text][logisim_circuit]
+
+![alt text][circuit_in_Nimbatus]
 
 #### Mask generation example
 Lets say you already have a drone (base.drn) that you want to extend by placing into it the circuit from circuit.circ.
@@ -34,6 +37,11 @@ python Logidrone.py mask_gen -i /path/to/base.drn -m /path/to/mask.png
 ```
 The mask file mask.png is an image where all empty space pixels are white and all occupied space pixels are red. You can now make empty space pixels green and use your updated mask to merge a circuit file and your drone as seen in the next example.
 
+For example the drone shown here:
+![alt text][drone_to_mask]
+
+Would result in the following mask:
+![alt text][drone_mask]
 
 #### Mask merge example
 Again ***this mode is NOT currently finished***, however here is how it will be used (This feature will be completed soon.).
@@ -49,5 +57,16 @@ python Logidrone.py mask_merge -i /path/to/base.drn -m /path/to/mask_edited.png 
 [Boolr]:http://boolr.me/
 
 
-[logisim_circuit]: https://github.com/houstonlucas/Logidrone/blob/master/readme_images/Logisim_circuit.png "test text"
+[logisim_circuit]: https://github.com/houstonlucas/Logidrone/blob/master/readme_images/Logisim_circuit.png "An example circuit in logisim."
+
+[circuit_in_Nimbatus]: https://github.com/houstonlucas/Logidrone/blob/master/readme_images/circuit_in_Nimbatus.png "The example circuit imported into Nimbatus."
+
+[drone_to_mask]: https://github.com/houstonlucas/Logidrone/blob/master/readme_images/drone_for_mask.png "An example drone for creating a mask."
+
+[drone_mask]: https://github.com/houstonlucas/Logidrone/blob/master/readme_images/my_mask.png "The mask produced by the example drone."
+
+[drone_mask_edited]: https://github.com/houstonlucas/Logidrone/blob/master/readme_images/my_mask_edited.png "The mask updated to show where gates can be placed."
+
+
+
 
