@@ -29,7 +29,7 @@ Circuit from logisim:
 <br/>
 Here we see one of the gates showing that it is wired properly in Nimbatus.
 <br/>
-<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_images/circuit_in_Nimbatus.png" alt="The example circuit imported into Nimbatus." width="300"/>
+<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_images/circuit_in_Nimbatus.png" alt="The example circuit imported into Nimbatus." width="400"/>
 
 #### Mask generation example
 Lets say you already have a drone (base.drn) that you want to extend by placing into it the circuit from circuit.circ.
@@ -46,12 +46,15 @@ For example the drone shown here:
 
 Would result in the following mask:
 <br/>
-<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_images/my_mask.png" alt="The mask produced by the example drone." width="200"/>
+<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_images/my_mask.png" alt="The mask produced by the example drone." width="250"/>
 
 #### Mask merge example
 Again ***this mode is NOT currently finished***, however here is how it will be used (This feature will be completed soon.).
 
 Once you have a mask file generated from your drone and updated to show where you want to place the logic gates you can now merge them with your circuit file.
+Here is an example of how one might edit the mask image to indicate where the logic gates should be placed.
+<br/>
+<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_images/my_mask_edited.png" alt="The mask updated to show where gates can be placed." width="250"/>
 
 ```
 python Logidrone.py mask_merge -i /path/to/base.drn -m /path/to/mask_edited.png -f /path/to/circuit.circ
