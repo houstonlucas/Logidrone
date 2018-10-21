@@ -24,9 +24,12 @@ python Logidrone.py circuit_gen -f /path/to/circuit.circ -o /path/to/my_new_dron
 This creates a drone that consists only of the drone core and the logic gates from Logisim stacked above the drone.
 
 Circuit from logisim:
+<br/>
 ![alt text][logisim_circuit]
-
-![alt text][circuit_in_Nimbatus]
+<br/>
+Here we see one of the gates showing that it is wired properly in Nimbatus.
+<br/>
+<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_images/circuit_in_Nimbatus.png" alt="The example circuit imported into Nimbatus." width="300"/>
 
 #### Mask generation example
 Lets say you already have a drone (base.drn) that you want to extend by placing into it the circuit from circuit.circ.
@@ -38,10 +41,12 @@ python Logidrone.py mask_gen -i /path/to/base.drn -m /path/to/mask.png
 The mask file mask.png is an image where all empty space pixels are white and all occupied space pixels are red. You can now make empty space pixels green and use your updated mask to merge a circuit file and your drone as seen in the next example.
 
 For example the drone shown here:
-![alt text][drone_to_mask]
+<br/>
+<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_image/drone_for_mask.png" alt="An example drone for creating a mask." width="100"/>
 
 Would result in the following mask:
-![alt text][drone_mask]
+<br/>
+<img src="https://github.com/houstonlucas/Logidrone/blob/master/readme_images/my_mask.png" alt="The mask produced by the example drone." width="200"/>
 
 #### Mask merge example
 Again ***this mode is NOT currently finished***, however here is how it will be used (This feature will be completed soon.).
