@@ -1,6 +1,8 @@
+import os
 import xml.etree.ElementTree as ET
 from itertools import product
 from PIL import Image, ImageDraw
+import zipfile
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -98,9 +100,10 @@ def main():
 def get_rect_origin(current_pixel, orientation):
     short, long = 0.5, 1.5
     if orientation == 'h':
-        return current_pixel[0] + long, current_pixel[1] + short
+        origin = current_pixel[0] + long, current_pixel[1] + short
     else:
-        return current_pixel[0] + short, current_pixel[1] + long
+        origin = current_pixel[0] + short, current_pixel[1] + long
+    return origin
 
 
 def find_locations_for_gates(im_in, fill_first):
@@ -127,6 +130,7 @@ def find_locations_for_gates(im_in, fill_first):
             index += 1
 
     return gate_locations
+
 
 def get_placement_offsets(orientation):
     short = [0, 1]
@@ -182,7 +186,15 @@ def get_orientation(elem):
 
 
 def get_parts(filename):
-    tree = ET.parse(filename)
+    # Unzip drn
+    zip = zipfile.ZipFile(filename)
+    zip.extract("DroneData", "temp")
+    zip.close()
+
+    tree = ET.parse("temp/DroneData")
+    os.remove("temp/DroneData")
+    os.rmdir("temp")
+
     root = tree.getroot()
 
     parts = []
@@ -231,7 +243,6 @@ def apply_rotation(pixel_locations, orientation):
 
 def draw_part(im, part, height, width, padding):
     part_shape = prefab_to_shape[part["PrefabId"]]
-    print(part["PrefabId"], part_shape, part["position"], part["orientation"])
     pixel_locations = shape_to_pixels[part_shape]
     pixel_locations = apply_rotation(pixel_locations, part['orientation'])
     for pixel_location in pixel_locations:
@@ -250,7 +261,6 @@ def make_image_from_parts(parts, image_out, padding=10):
     for part in parts:
         draw_part(im, part, height, width, padding)
 
-    im.show()
     im.save(image_out)
 
 
