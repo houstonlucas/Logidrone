@@ -23,6 +23,7 @@ python Logidrone.py circuit_gen -f /path/to/circuit.circ -o /path/to/my_new_dron
 ```
 This creates a drone that consists only of the drone core and the logic gates from Logisim stacked above the drone.
 
+![alt text][logisim_circuit]
 
 #### Mask generation example
 Lets say you already have a drone (base.drn) that you want to extend by placing into it the circuit from circuit.circ.
@@ -46,3 +47,7 @@ python Logidrone.py mask_merge -i /path/to/base.drn -m /path/to/mask_edited.png 
 [Logisim]: http://logisim.altervista.org/
 [Nimbatus]: https://www.nimbatus.ch/
 [Boolr]:http://boolr.me/
+
+
+[logisim_circuit]: https://github.com/houstonlucas/Logidrone/blob/master/readme_images/Logisim_circuit.png "test text"
+
