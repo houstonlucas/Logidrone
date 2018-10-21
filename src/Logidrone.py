@@ -89,18 +89,19 @@ class CircuitReader:
 
 
 class CircuitReader_Logisim(CircuitReader):
-    node_pin_offsets = {'PIN':  {'input':[0,0], 'output':[0,0]}, 'NOT':  {'input':[(-30,0)], 'output':[(0,0)]}, 'AND':  {'input':[(-50,-20),(-50,-10),(-50,0),(-50,10),(-50,20)], 'output':[(0,0)]}, 'OR':   {'input':[(-50,-20),(-50,-10),(-50,0),(-50,10),(-50,20)], 'output':[(0,0)]}, 'NOR':  {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'NAND': {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'XOR':  {'input':[(-60,-20),(-60,-10),(-60,0),(-60,10),(-60,20)], 'output':[(0,0)]}, 'XNOR': {'input':[(-70,-20),(-70,-10),(-70,0),(-70,10),(-70,20)], 'output':[(0,0)]}}
 
-    def __init__(self, arg):
+    def __init__(self):
         super(CircuitReader_Logisim, self).__init__()
+        self.node_pin_offsets = {'PIN':  {'input':[[0,0]], 'output':[[0,0]]}, 'NOT':  {'input':[[-30,0]], 'output':[[0,0]]}, 'AND':  {'input':[[-50,-20],[-50,-10],[-50,0],[-50,10],[-50,20]], 'output':[[0,0]]}, 'OR':   {'input':[[-50,-20],[-50,-10],[-50,0],[-50,10],[-50,20]], 'output':[[0,0]]}, 'NOR':  {'input':[[-60,-20],[-60,-10],[-60,0],[-60,10],[-60,20]], 'output':[[0,0]]}, 'NAND': {'input':[[-60,-20],[-60,-10],[-60,0],[-60,10],[-60,20]], 'output':[[0,0]]}, 'XOR':  {'input':[[-60,-20],[-60,-10],[-60,0],[-60,10],[-60,20]], 'output':[[0,0]]}, 'XNOR': {'input':[[-70,-20],[-70,-10],[-70,0],[-70,10],[-70,20]], 'output':[[0,0]]}}
 
     def load_file(self, file_name):
         with open(file_name, 'rt') as base_file:
             self.loigisim_tree = ET.parse(base_file)
-        self.loigisim_iter = loigisim_tree.getiterator()
+        self.loigisim_iter = self.loigisim_tree.getiterator()
+        # raise NotImplementedError
 
     def get_nodes(self):
-        for item in loigisim_iter:
+        for item in self.loigisim_iter:
             if item.tag == "comp":
                 comp = {}
                 comp['input_loc'] = []
@@ -112,31 +113,56 @@ class CircuitReader_Logisim(CircuitReader):
                     if attr.get("name") == 'label':
                         comp['name'] = attr.get("val")
                 self.nodes.append(comp)
+        # raise NotImplementedError
 
     def get_wires(self):
-        for item in loigisim_iter:
+        for item in self.loigisim_iter:
             if item.tag == 'wire':
                 self.wires.append([eval(item.get('from')),eval(item.get('to'))])
+        # raise NotImplementedError
+
+    def have_available(self, f_pos, l_pos):
+        for wire in self.wires:
+            if wire[0] == eval(str(f_pos)) and wire[1] != eval(str(l_pos)):
+                return True
+            elif wire[1] == eval(str(f_pos))  and wire[0] != eval(str(l_pos)):
+                return True
+        return False
+
+    def get_next_layer(self, f_pos, l_pos):
+        #l_pos = f_pos
+        n_layer = []
+        for wire in self.wires:
+            if wire[0] == eval(str(f_pos)) and wire[1] != eval(str(l_pos)):
+                n_layer.append(wire[1])
+            elif wire[1] == eval(str(f_pos))  and wire[0] != eval(str(l_pos)):
+                n_layer.append(wire[0])
+        return n_layer
+
+    def get_end_points(self, f_pos, l_pos):
+        end_points = []
+        next_layer = self.get_next_layer(f_pos, l_pos)
+        for ft_pos in next_layer:
+            if self.have_available(ft_pos, f_pos):
+                end_points.extend(self.get_end_points(ft_pos, f_pos))
+            else:
+                end_points.append(ft_pos)
+        return end_points
 
     def forward(self, node):
-        # Mapping format
-        mapping = {
-            'A': ['D'],
-            'B': ['D'],
-            'C': ['E'],
-            'D': ['E']
-        }
-        name = node['outputs']
-        maps_to = []
-        if name in mapping:
-            maps_to = mapping[name]
-        ans = []
-        for node_index, n in enumerate(self.nodes):
-            for output in n['outputs']:
-                if output == maps_to:
-                    ans.append(node_index)
-        return ans
-        # raise NotImplementedError
+        current_layer = []
+        current_layer.append(node['output_loc'][0])
+        end_points = self.get_end_points(current_layer[0], current_layer[0])
+
+        indexes = []
+        for i in range(len(self.nodes)):
+            for comp_type in self.node_pin_offsets:
+                if comp_type in self.nodes[i]['type'].upper():
+                    for offset in self.node_pin_offsets[comp_type]['input']:
+                        for end_point in end_points:
+                            if end_point[0] == offset[0]+eval(str(self.nodes[i]['output_loc'][0]))[0] and end_point[1] == offset[1]+eval(str(self.nodes[i]['output_loc'][0]))[1]:
+                                indexes.append(i)
+        return indexes
 
 
 class DroneWriter:
