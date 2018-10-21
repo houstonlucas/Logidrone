@@ -4,20 +4,20 @@ Logidrone might be expanded at some point to also accept other digital circuit e
 
 
 ### How to use
-Logidrone has several modes, currently those modes are:
+Logidrone has several command, currently those command are:
 
-**circuit_gen**: This mode takes a circuit file and produces a drone file that contains the given curcuit.
+**circuit_gen**: This command takes a circuit file and produces a drone file that contains the given curcuit.
 
-**mask_gen**: This mode takes in a drone file and generates a mask image that you can use to specify where you want the logic gates placed on the drone.
+**mask_gen**: This command takes in a drone file and generates a mask image that you can use to specify where you want the logic gates placed on the drone.
 
 **mask_merge**: This mode takes in a base drone file, a mask image, and a circuit file and places the circuit on the drone based on the mask image.
-This mode is currently ***NOT*** finished. :'( 
+This command is currently ***NOT*** finished. :'( 
 
 ### Examples
 To use these examples download the repository and have a terminal or command prompt open in the src directory.
 
 #### Circuit generation example
-Lets say you have a circuit file circuit.circ that you want in Nimbatus. To create a drone with only the logic you use the following command.
+Lets say you have a circuit file circuit.circ that you want in Nimbatus. To create a drone with only the logic from a circuit, you use the following command.
 ```
 python Logidrone.py circuit_gen -f /path/to/circuit.circ -o /path/to/my_new_drone.drn
 ```
